@@ -2,6 +2,7 @@
     # WARNING: this is experimental mileage may vary!
 
     # Image appears to be a Docker Hub Image. Fetch docker image
+    image_name=quay.io/mrrrgn/ubuntu-ci:0.0.1
     image_name=docker-loop
     #docker pull 'quay.io/mrrrgn/ubuntu-ci:0.0.1'
 
@@ -22,10 +23,12 @@
       -e RUN_LOCALLY='true' \
       -p 5900 \
       ${image_name} \
-      #/bin/bash -l -c 'echo hello'
+      #/bin/bash -l -c './bin/setup-x11.sh && git clone https://github.com/mozilla/loop.git repo && cd repo && git checkout taskcluster-experimental && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox make karma'
 
-# && git clone https://github.com/mozilla/loop.git repo && cd repo && git checkout taskcluster-experimental && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox TEST_SERVER=dev make functional"
+
 # git clone https://github.com/mozilla/loop.git repo && cd repo && git checkout taskcluster-experimental && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2
 # TEST_BROWSER=`pwd`/firefox/firefox TEST_SERVER=dev make functional"
+#mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2
+
     # Delete docker container
     docker rm -v "${container_name}"

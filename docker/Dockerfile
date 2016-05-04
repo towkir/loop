@@ -1,17 +1,25 @@
-FROM          taskcluster/ubuntu1204-test-upd:0.1.9.20160329211700
+FROM          ubuntu:15.10
 
 # A lot of this was based on from
 # http://hg.mozilla.org/mozilla-central/file/0a25833062a8/testing/docker/desktop-test/Dockerfile
 
-RUN curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-RUN apt-get update -y
-RUN apt-get install -y git \
-    nodejs \
-    && apt-get clean
+# Note: we install Firefox here to get the dependencies easily.
+RUN apt-get update -y && apt-get install -y git \
+  firefox \
+  python-dev \
+  python-pip \
+  nodejs \
+  nodejs-legacy \
+  npm \
+  x11vnc \
+  xutils \
+  xvfb \
+  zip \
+  && apt-get clean
 
-RUN pip install virtualenvwrapper
-RUN pip install mozdownload
-RUN pip install pyperclip
+RUN update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
+
+RUN pip install virtualenv virtualenvwrapper mozdownload pyperclip
 
 # configure git and install tc-vcs
 RUN git config --global user.email "nobody@mozilla.com" && \
@@ -26,7 +34,10 @@ ENV           LOGNAME       worker
 ENV           HOSTNAME      taskcluster-worker
 
 ### add worker user and setup its workspace
-COPY          entrypoint.sh /home/worker/bin/
+RUN           useradd -d /home/worker -s /bin/bash -m worker
+WORKDIR       /home/worker
+RUN           mkdir -p /home/worker/bin
+COPY          setup-x11.sh /home/worker/bin/
 RUN           chmod 755 /home/worker/bin/*
 RUN           chown -R worker:worker /home/worker
 USER          worker
@@ -38,8 +49,6 @@ RUN           mkdir artifacts/public
 ### Set up VNC
 RUN           mkdir /home/worker/.vnc
 RUN           x11vnc -storepasswd 1234 /home/worker/.vnc/passwd
-
-ENTRYPOINT ["/home/worker/bin/entrypoint.sh"]
 
 # Disable Ubuntu update prompt
 # http://askubuntu.com/questions/515161/ubuntu-12-04-disable-release-notification-of-14-04-in-update-manager
