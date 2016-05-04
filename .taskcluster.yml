@@ -14,7 +14,7 @@ tasks:
     workerType: "{{ taskcluster.docker.workerType }}"
     payload:
       maxRunTime: 1200
-      image: "quay.io/mrrrgn/ubuntu-ci:0.0.1"
+      image: "standard8/loop:latest"
       command:
         - "/bin/bash"
         - "-lc"
