@@ -23,7 +23,7 @@
       -e RUN_LOCALLY='true' \
       -p 5900 \
       ${image_name} \
-      #/bin/bash -l -c './bin/setup-x11.sh && git clone https://github.com/mozilla/loop.git repo && cd repo && git checkout taskcluster-experimental && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox make karma'
+      /bin/bash -l -c './bin/setup-x11.sh && sudo apt-get update && sudo apt-get upgrade -y google-chrome-stable && git clone https://github.com/mozilla/loop.git repo && cd repo && git checkout taskcluster-experimental && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox make karma'
 
 
 # git clone https://github.com/mozilla/loop.git repo && cd repo && git checkout taskcluster-experimental && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2

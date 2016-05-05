@@ -3,14 +3,23 @@ FROM          ubuntu:15.10
 # A lot of this was based on from
 # http://hg.mozilla.org/mozilla-central/file/0a25833062a8/testing/docker/desktop-test/Dockerfile
 
-# Note: we install Firefox here to get the dependencies easily.
+RUN apt-get update -y && apt-get install -y wget
+
+# Note: we install Firefox & Chrome here so we have the base dependencies already
+# installed.
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+
 RUN apt-get update -y && apt-get install -y git \
   firefox \
+  google-chrome-stable \
   python-dev \
   python-pip \
   nodejs \
   nodejs-legacy \
   npm \
+  sudo \
+  wget \
   x11vnc \
   xutils \
   xvfb \
@@ -32,9 +41,15 @@ ENV           SHELL         /bin/bash
 ENV           USER          worker
 ENV           LOGNAME       worker
 ENV           HOSTNAME      taskcluster-worker
+ENV           TRAVIS        1
 
-### add worker user and setup its workspace
+# add worker user and setup its workspace
 RUN           useradd -d /home/worker -s /bin/bash -m worker
+RUN           echo "worker:worker" | chpasswd
+### We allow sudo, so that we can ensure google chrome is the latest without having
+### to rebuild the docker image all the time.
+RUN           adduser worker sudo
+RUN           sudo echo "worker ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 WORKDIR       /home/worker
 RUN           mkdir -p /home/worker/bin
 COPY          setup-x11.sh /home/worker/bin/
@@ -42,11 +57,11 @@ RUN           chmod 755 /home/worker/bin/*
 RUN           chown -R worker:worker /home/worker
 USER          worker
 
-### Various useful directories
+# Various useful directories
 RUN           mkdir artifacts
 RUN           mkdir artifacts/public
 
-### Set up VNC
+# Set up VNC
 RUN           mkdir /home/worker/.vnc
 RUN           x11vnc -storepasswd 1234 /home/worker/.vnc/passwd
 
