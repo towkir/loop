@@ -54,7 +54,7 @@ tasks:
     workerType: "{{ taskcluster.docker.workerType }}"
     payload:
       maxRunTime: 1200
-      image: "standard8/loop:latest"
+      image: "standard8/loop-functional:latest"
       command:
         - "/bin/bash"
         - "-lc"
